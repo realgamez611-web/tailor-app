@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bespoke Tailors - Premium Order Management</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary-dark: #1b2a4a;
+      --gold: #c5a059;
+      --gold-hover: #b08c46;
+      --bg-cream: #fbf9f5;
+      --card-white: #ffffff;
+      --text-dark: #222222;
+      --text-muted: #666666;
+      --border-color: #e2d9cc;
+      --wa-green: #25d366;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg-cream); color: var(--text-dark); padding: 24px 12px; }
+
+    /* CLASSIC HEADER */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .brand-header p {
+      font-size: 0.9rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* MAIN CONTAINER */
+    .app-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 880px) {
+      .app-layout { grid-template-columns: 1fr; }
+    }
+
+    /* CARDS & PANELS */
+    .card {
+      background: var(--card-white);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(27, 42, 74, 0.04);
+    }
+
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      color: var(--primary-dark);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* FORM STYLING */
+    .form-group { margin-bottom: 14px; }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: #fafafa;
+      transition: all 0.2s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+    /* ACTION BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+    .btn-primary { background: var(--primary-dark); color: white; }
+    .btn-primary:hover { background: #0f1a30; }
+    .btn-wa { background: var(--wa-green); color: white; }
+    .btn-wa:hover { background: #1eb956; }
+    .btn-outline { background: transparent; border: 1px solid var(--primary-dark); color: var(--primary-dark); }
+    .btn-outline:hover { background: var(--bg-cream); }
+
+    /* RECEIPT DOCUMENT DESIGN */
+    .receipt-paper {
+      background: #ffffff;
+      border: 1px solid #dcdcdc;
+      padding: 24px;
+      border-radius: 4px;
+      position: relative;
+      font-size: 0.85rem;
+      color: #333;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+    }
+    .receipt-header {
+      text-align: center;
+      border-bottom: 2px double var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .receipt-header h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      color: var(--primary-dark);
+    }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+    }
+    .receipt-table th {
+      background: var(--bg-cream);
+      padding: 6px;
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .receipt-table td {
+      padding: 6px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* STAGE TIMELINE */
+    .pipeline {
+      display: flex;
+      justify-content: space-between;
+      margin: 16px 0;
+      position: relative;
+      padding: 0 4px;
+    }
+    .stage-dot {
+      text-align: center;
+      flex: 1;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      position: relative;
+    }
+    .stage-dot::before {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 50%;
+      margin: 0 auto 6px auto;
+    }
+    .stage-dot.active {
+      color: var(--primary-dark);
+      font-weight: bold;
+    }
+    .stage-dot.active::before {
+      background: var(--gold);
+      box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.3);
+    }
+
+    /* BOT PREVIEW CONTAINER */
+    .bot-preview {
+      background: #e5ddd5;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+    }
+    .chat-bubble {
+      background: #ffffff;
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 8px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      max-width: 90%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CLASSIC BRAND HEADER -->
+  <header class="brand-header">
+    <h1>Royal Fit Atelier</h1>
+    <p>Bespoke Tailoring & Order Tracker</p>
+  </header>
+
+  <main class="app-layout">
+    <!-- LEFT PANEL: ORDER INPUT FORM -->
+    <section class="card">
+      <div class="card-title">
+        <span>Order Management</span>
+        <span style="font-size: 0.8rem; font-family: sans-serif; color: var(--gold);" id="orderIdTag">#RFA-1001</span>
+      </div>
+
+      <form id="tailorForm">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" id="custName" placeholder="e.g. Vikramaditya Sharma" required oninput="renderApp()">
+          </div>
+          <div class="form-group">
+            <label>WhatsApp Number</label>
+            <input type="tel" id="custPhone" placeholder="10-digit mobile number" required oninput="renderApp()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Garment & Fabric Specification</label>
+          <input type="text" id="garment" placeholder="e.g. 2-Piece Italian Wool Suit (Navy)" required oninput="renderApp()">
+        </div>
+
+        <div class="form-group">
+          <label>Body Measurements (Inches)</label>
+          <div class="grid-4">
+            <input type="number" id="mChest" placeholder="Chest" oninput="renderApp()">
+            <input type="number" id="mWaist" placeholder="Waist" oninput="renderApp()">
+            <input type="number" id="mLength" placeholder="Length" oninput="renderApp()">
+            <input type="number" id="mShoulder" placeholder="Shoulder" oninput="renderApp()">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Total Fee (₹)</label>
+            <input type="number" id="totalFee" placeholder="4500" oninput="renderApp()">
+          </div>
+          <div class="form-group">
+            <label>Advance Deposit (₹)</label>
+            <input type="number" id="advancePaid" placeholder="1500" oninput="renderApp()">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Current Status</label>
+            <select id="stage" onchange="renderApp()">
+              <option value="Received">1. Order Received</option>
+              <option value="Cutting">2. Fabric Cutting</option>
+              <option value="Stitching">3. Hand Stitching</option>
+              <option value="Trial Ready">4. Trial Ready</option>
+              <option value="Completed">5. Completed & Delivered</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Promised Delivery</label>
+            <input type="date" id="dueDate" onchange="renderApp()">
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="saveOrderLocal()">💾 Save Order to Database</button>
+      </form>
+    </section>
+
+    <!-- RIGHT PANEL: CLASSIC DIGITAL RECEIPT & BOT HUB -->
+    <section>
+      <div class="card">
+        <div class="card-title">
+          <span>Digital Invoice & Receipt</span>
+          <button style="width: auto; padding: 4px 8px; font-size: 0.7rem;" class="btn btn-outline" onclick="window.print()">🖨️ Print PDF</button>
+        </div>
+
+        <!-- ELEGANT RECEIPT PREVIEW -->
+        <div class="receipt-paper" id="printableReceipt">
+          <div class="receipt-header">
+            <h3>Royal Fit Atelier</h3>
+            <p style="font-size: 0.7rem; color: #777;">Fine Tailoring & Custom Apparel</p>
+            <p style="font-size: 0.75rem; margin-top: 4px;"><strong>Invoice:</strong> <span id="rInvoice">#RFA-1001</span></p>
+          </div>
+
+          <div class="receipt-row">
+            <span><strong>Client:</strong> <span id="rName">---</span></span>
+            <span><strong>Phone:</strong> <span id="rPhone">---</span></span>
+          </div>
+          <div class="receipt-row">
+            <span><strong>Delivery Date:</strong> <span id="rDueDate">---</span></span>
+          </div>
+
+          <hr style="border: none; border-top: 1px dashed var(--border-color); margin: 10px 0;">
+
+          <!-- PIPELINE INDICATOR -->
+          <div class="pipeline">
+            <div class="stage-dot" id="s-Received">Received</div>
+            <div class="stage-dot" id="s-Cutting">Cutting</div>
+            <div class="stage-dot" id="s-Stitching">Stitching</div>
+            <div class="stage-dot" id="s-Trial Ready">Trial</div>
+            <div class="stage-dot" id="s-Completed">Ready</div>
+          </div>
+
+          <table class="receipt-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th style="text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span id="rGarment">---</span><br><small style="color: #777;" id="rMeasurements">Measurements: N/A</small></td>
+                <td style="text-align: right;">₹<span id="rTotal">0.00</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="text-align: right; line-height: 1.6;">
+            <p>Advance Deposit: <span style="color: green;">-₹<span id="rAdvance">0.00</span></span></p>
+            <p style="font-size: 1rem; color: #a31621; font-weight: bold; margin-top: 4px;">
+              Balance Due: ₹<span id="rBalance">0.00</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- WHATSAPP DISPATCH -->
+        <div style="margin-top: 16px;">
+          <button class="btn btn-wa" onclick="sendWhatsAppReceipt()">📲 Dispatch Invoice via WhatsApp</button>
+          <button class="btn btn-outline" style="margin-top: 6px;" onclick="sendWhatsAppStatus()">🔔 Push Real-Time Work Update</button>
+        </div>
+
+        <!-- AUTOMATED BOT WHATSAPP PREVIEW -->
+        <div class="bot-preview">
+          <p style="font-size: 0.7rem; font-weight: bold; color: #555; margin-bottom: 6px;">🤖 WhatsApp Bot Response Preview:</p>
+          <div class="chat-bubble" id="botPreviewText">
+            "Hello! Reply 'STATUS' to track your tailor order in real-time."
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Initialize default date
+    document.getElementById('dueDate').valueAsDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    function renderApp() {
+      const name = document.getElementById('custName').value || "Client Name";
+      let phone = document.getElementById('custPhone').value || "---";
+      const garment = document.getElementById('garment').value || "Custom Garment";
+      const total = parseFloat(document.getElementById('totalFee').value) || 0;
+      const advance = parseFloat(document.getElementById('advancePaid').value) || 0;
+      const balance = Math.max(0, total - advance);
+      const stage = document.getElementById('stage').value;
+      const dueDate = document.getElementById('dueDate').value;
+
+      // Measurements text
+      const chest = document.getElementById('mChest').value;
+      const waist = document.getElementById('mWaist').value;
+      const length = document.getElementById('mLength').value;
+      const shoulder = document.getElementById('mShoulder').value;
+      
+      let mText = [];
+      if(chest) mText.push(`Chest: ${chest}"`);
+      if(waist) mText.push(`Waist: ${waist}"`);
+      if(length) mText.push(`Len: ${length}"`);
+      if(shoulder) mText.push(`Shld: ${shoulder}"`);
+
+      // Update UI elements
+      document.getElementById('rName').innerText = name;
+      document.getElementById('rPhone').innerText = phone;
+      document.getElementById('rGarment').innerText = garment;
+      document.getElementById('rMeasurements').innerText = mText.length > 0 ? mText.join(" | ") : "No size recorded";
+      document.getElementById('rTotal').innerText = total.toFixed(2);
+      document.getElementById('rAdvance').innerText = advance.toFixed(2);
+      document.getElementById('rBalance').innerText = balance.toFixed(2);
+      document.getElementById('rDueDate').innerText = dueDate;
+
+      // Pipeline stages styling
+      const stages = ['Received', 'Cutting', 'Stitching', 'Trial Ready', 'Completed'];
+      const activeIdx = stages.indexOf(stage);
+
+      stages.forEach((stg, idx) => {
+        const el = document.getElementById(`s-${stg}`);
+        if(idx <= activeIdx) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+
+      // Dynamic WhatsApp Bot Response Simulation
+      document.getElementById('botPreviewText').innerHTML = 
+        `🧵 <strong>Royal Fit Bot</strong><br>` +
+        `Order <strong>#RFA-1001</strong> for <em>${name}</em><br>` +
+        `• Work Stage: <strong>${stage}</strong><br>` +
+        `• Balance Pending: <strong>₹${balance.toFixed(2)}</strong><br>` +
+        `• Promised Date: ${dueDate}`;
+    }
+
+    function formatPhone(phoneRaw) {
+      let phone = phoneRaw.replace(/[^0-9]/g, '');
+      if (phone.length === 10) phone = '91' + phone;
+      return phone;
+    }
+
+    function sendWhatsAppReceipt() {
+      renderApp();
+      const phone = formatPhone(document.getElementById('custPhone').value);
+      if (!phone || phone.length < 10) return alert("Please enter a valid phone number!");
+
+      const name = document.getElementById('rName').innerText;
+      const garment = document.getElementById('rGarment').innerText;
+      const total = document.getElementById('rTotal').innerText;
+      const advance = document.getElementById('rAdvance').innerText;
+      const balance = document.getElementById('rBalance').innerText;
+      const dueDate = document.getElementById('rDueDate').innerText;
+
+      const message = `✂️ *ROYAL FIT ATELIER - OFFICIAL INVOICE*%0A%0A` +
+        `Dear *${name}*, thank you for choosing Royal Fit Atelier.%0A%0A` +
+        `📋 *Order Summary:*%0A` +
+        `• *Garment:* ${garment}%0A` +
+        `• *Promised Delivery:* ${dueDate}%0A%0A` +
+        `💰 *Payment Breakdown:*%0A` +
+        `• Total Amount: ₹${total}%0A` +
+        `• Advance Paid: ₹${advance}%0A` +
+        `• *Balance Due: ₹${balance}*%0A%0A` +
+        `📲 *Live Status Bot:* Reply *STATUS* to this message anytime for live updates.`;
+
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    }
+
+    function sendWhatsAppStatus() {
+      const phone = formatPhone(document.getElementById('custPhone').value);
+      if (!phone || phone.length < 10) return alert("Please enter a valid phone number!");
+
+      const name = document.getElementById('rName').innerText;
+      const stage = document.getElementById('stage').value;
+      const balance = document.getElementById('rBalance').innerText;
+
+      const message = `🔔 *ROYAL FIT ATELIER - WORK PROGRESS UPDATE*%0A%0A` +
+        `Dear *${name}*, your order has reached a new stage:%0A%0A` +
+        `📍 *Current Work Progress:* *${stage.toUpperCase()}*%0A` +
+        `💵 *Pending Balance:* ₹${balance}%0A%0A` +
+        `Thank you for your patience!`;
+
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    }
+
+    function saveOrderLocal() {
+      renderApp();
+      const orderData = {
+        name: document.getElementById('custName').value,
+        phone: document.getElementById('custPhone').value,
+        garment: document.getElementById('garment').value,
+        total: document.getElementById('totalFee').value,
+        advance: document.getElementById('advancePaid').value,
+        stage: document.getElementById('stage').value,
+        dueDate: document.getElementById('dueDate').value
+      };
+      localStorage.setItem('lastTailorOrder', JSON.stringify(orderData));
+      alert("Order successfully saved to local database!");
+    }
+
+    // Run initial view setup
+    renderApp();
+  </script>
+</body>
+</html>

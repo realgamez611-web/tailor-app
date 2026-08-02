@@ -1,0 +1,15 @@
+{
+  "name": "Royal Fit Atelier",
+  "short_name": "TailorPro",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#1b2a4a",
+  "theme_color": "#1b2a4a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050239.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
